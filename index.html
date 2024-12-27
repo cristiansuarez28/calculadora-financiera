@@ -6,7 +6,6 @@
     <title>Calculadora de Préstamos</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 </head>
 <body>
     <div class="calculator-container">
@@ -24,7 +23,6 @@
                 <option value="15000000">15,000,000</option>
                 <option value="20000000">20,000,000</option>
                 <option value="30000000">30,000,000</option>
-                <option value="other">Otro</option>
             </select>
             <input type="number" id="customCapital" placeholder="Escribe otro monto" style="display: none;">
             <small class="error-message" id="capitalError"></small>
@@ -33,7 +31,21 @@
             <input type="number" id="installments" placeholder="Ejemplo: 24 cuotas" required>
             <small class="error-message" id="installmentsError"></small>
             
-            
+            <!-- Nuevo campo de selección de banco -->
+            <label for="bank">Selecciona un banco:</label>
+            <select id="bank" onchange="toggleCalculateButton()">
+            <option value="">Selecciona un banco</option>
+            <option value="bancoBogota">Banco de Bogotá</option>
+            <option value="bancolombia">Bancolombia</option>
+            <option value="davivienda">Davivienda</option>
+            <option value="bbva">BBVA Colombia</option>
+            <option value="bancoPopular">Banco Popular</option>
+            </select>
+            <small class="error-message" id="bankError"></small>
+
+            <!-- Muestra la tasa de interés según el banco -->
+            <p id="interestRate"></p>
+
             <button type="button" id="calculateButton" onclick="validateAndCalculate()" disabled>Calcular</button>
         </form>
         <p id="result"></p>

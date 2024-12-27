@@ -11,7 +11,6 @@ body {
     height: 100vh;
 }
 
-
 /* Contenedor principal */
 .calculator-container {
     width: 100%;
@@ -124,4 +123,22 @@ select.invalid {
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+/* Estilo para el campo de selección de banco */
+form #bankSelect {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Estilo para mostrar la tasa de interés */
+#interestRate {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333;
 }

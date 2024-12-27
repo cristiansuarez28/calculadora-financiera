@@ -1,179 +1,137 @@
-// Función que muestra el campo de monto personalizado cuando se selecciona "Otro"
+// Array de objetos para los bancos y sus tasas de interés
+const banks = [
+    { name: "bancoBogota", interestRate: 0.115, label: "Tasa de interés: 11.5%" },
+    { name: "bancolombia", interestRate: 0.15, label: "Tasa de interés: 15%" },
+    { name: "davivienda", interestRate: 0.08, label: "Tasa de interés: 8%" },
+    { name: "bbva", interestRate: 0.115, label: "Tasa de interés: 11.5%" },
+    { name: "bancoPopular", interestRate: 0.05, label: "Tasa de interés: 5%" }
+];
+
+// Función para mostrar el input de capital personalizado
 function showCustomCapitalInput() {
-    let capitalSelect = document.getElementById("capital");
-    let customCapitalInput = document.getElementById("customCapital");
-    
-    if (capitalSelect.value === "other") {
-        customCapitalInput.style.display = "block";
-    } else {
+    const capitalSelect = document.getElementById("capital");
+    const customCapitalInput = document.getElementById("customCapital");
+
+    if (capitalSelect.value === "") {
         customCapitalInput.style.display = "none";
+    } else {
+        customCapitalInput.style.display = "block";
     }
 }
 
-// Función para habilitar o deshabilitar el botón de calcular
+// Función para actualizar la tasa de interés según el banco seleccionado
+function updateInterestRate() {
+    const bankValue = document.getElementById("bank").value;
+    const interestRateElement = document.getElementById("interestRate");
+
+    // Buscar el banco seleccionado en el array
+    const selectedBank = banks.find(bank => bank.name === bankValue);
+
+    if (selectedBank) {
+        interestRateElement.innerText = selectedBank.label;
+
+        // Mostrar en la consola el banco seleccionado y su tasa de interés
+        console.log(`Banco seleccionado: ${selectedBank.name}`);
+        console.log(`Tasa de interés: ${selectedBank.interestRate * 100}%`);
+    } else {
+        interestRateElement.innerText = "";
+    }
+
+    toggleCalculateButton(); // Actualizar el estado del botón después de seleccionar el banco
+}
+
+// Función para habilitar el botón de calcular si todos los campos están completos
 function toggleCalculateButton() {
-    let income = document.getElementById("income").value;
-    let capital = document.getElementById("capital").value;
-    let customCapital = document.getElementById("customCapital").value;
-    let installments = document.getElementById("installments").value;
-    let calculateButton = document.getElementById("calculateButton");
+    const income = document.getElementById("income").value;
+    const capital = document.getElementById("capital").value || document.getElementById("customCapital").value;
+    const installments = document.getElementById("installments").value;
+    const bank = document.getElementById("bank").value;
 
-    // Verificar si todos los campos son válidos
-    if (
-        income !== "" && capital !== "" && installments !== "" &&
-        !document.getElementById("income").classList.contains("invalid") &&
-        !document.getElementById("capital").classList.contains("invalid") &&
-        !document.getElementById("installments").classList.contains("invalid")
-    ) {
-        calculateButton.disabled = false; // Habilitar el botón
+    const calculateButton = document.getElementById("calculateButton");
+
+    if (income && capital && installments && bank) {
+        calculateButton.disabled = false;
     } else {
-        calculateButton.disabled = true; // Deshabilitar el botón
+        calculateButton.disabled = true;
     }
 }
 
-// Función para validar los campos y calcular el préstamo
+// Función para validar los campos antes de calcular
 function validateAndCalculate() {
-    let income = parseFloat(document.getElementById("income").value);
-    let capital = document.getElementById("capital").value;
-    let customCapital = document.getElementById("customCapital").value;
-    let installments = parseInt(document.getElementById("installments").value);
+    const income = document.getElementById("income");
+    const capital = document.getElementById("capital").value || document.getElementById("customCapital").value;
+    const installments = document.getElementById("installments");
+    const bank = document.getElementById("bank").value;
 
-    // Limpiar mensajes de error
-    document.getElementById("incomeError").innerText = "";
-    document.getElementById("capitalError").innerText = "";
-    document.getElementById("installmentsError").innerText = "";
-    document.getElementById("result").innerText = "";
+    let valid = true;
 
-    // Limpiar clases invalidas
-    document.getElementById("income").classList.remove("invalid");
-    document.getElementById("capital").classList.remove("invalid");
-    document.getElementById("installments").classList.remove("invalid");
-
-    // Validar ingresos (al menos 6 dígitos)
-    if (isNaN(income) || income <= 0 || !Number.isInteger(income)) {
-        document.getElementById("incomeError").innerText = "Por favor, ingresa un valor válido para tus ingresos.";
-        document.getElementById("income").classList.add("invalid");
-        toggleCalculateButton(); // Actualizar el estado del botón
-        return;
-    } else if (income < 1000000) {
-        document.getElementById("incomeError").innerText = "Por favor, ingresa un ingreso de al menos 1,000,000.";
-        document.getElementById("income").classList.add("invalid");
-        toggleCalculateButton(); // Actualizar el estado del botón
-        return;
-    } else if (income > 30000000) {
-        document.getElementById("incomeError").innerText = "El salario no puede exceder 30,000,000.";
-        document.getElementById("income").classList.add("invalid");
-        toggleCalculateButton(); // Actualizar el estado del botón
-        return;
-    }
-
-    // Validar monto del préstamo
-    if (capital === "other") {
-        capital = parseFloat(customCapital);
-        if (isNaN(capital) || capital <= 0 || !Number.isInteger(capital)) {
-            document.getElementById("capitalError").innerText = "Por favor, ingresa un monto válido para el préstamo.";
-            document.getElementById("capital").classList.add("invalid");
-            toggleCalculateButton(); // Actualizar el estado del botón
-            return;
-        } else if (capital > 1000000000) {
-            document.getElementById("capitalError").innerText = "El monto del préstamo no puede exceder 1,000,000,000.";
-            document.getElementById("capital").classList.add("invalid");
-            toggleCalculateButton(); // Actualizar el estado del botón
-            return;
-        }
-    } else {
-        capital = parseFloat(capital);
-    }
-
-    // Validar cuotas
-    if (isNaN(installments) || installments <= 0 || !Number.isInteger(installments)) {
-        document.getElementById("installmentsError").innerText = "Por favor, ingresa un número válido de cuotas.";
-        document.getElementById("installments").classList.add("invalid");
-        toggleCalculateButton(); // Actualizar el estado del botón
-        return;
-    }
-
-    // Validación de elegibilidad según los ingresos
-    let maxLoanAmount = 0;
-    if (income >= 2000000 && income <= 3000000) {
-        maxLoanAmount = 20000000;
-        if (capital < 10000000 || capital > maxLoanAmount) {
-            document.getElementById("result").innerText = "No cumples con los requisitos para este préstamo. El préstamo debe estar entre $10,000,000 y $20,000,000.";
-            toggleCalculateButton(); // Actualizar el estado del botón
-            return;
-        }
-    } else if (income >= 3500000) {
-        maxLoanAmount = 1000000000;
-        if (capital < 10000000 || capital > maxLoanAmount) {
-            document.getElementById("result").innerText = "No cumples con los requisitos para este préstamo. El préstamo debe estar entre $10,000,000 y $1,000,000,000.";
-            toggleCalculateButton(); // Actualizar el estado del botón
-            return;
-        }
-    } else {
-        document.getElementById("result").innerText = "No eres elegible para un préstamo con este salario.";
-        toggleCalculateButton(); // Actualizar el estado del botón
-        return;
-    }
-
-    // Tasa fija
-    const fixedRate = 12.5; // Tasa anual fija en porcentaje
-    const monthlyRate = fixedRate / 12 / 100;
-
-    // Calcular cuota mensual
-    let monthlyPayment = (capital * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -installments));
-
-    // Calcular total a pagar
-    let totalAmount = monthlyPayment * installments;
-
-    // Mostrar resultado
-    document.getElementById("result").innerText = `Tu préstamo es de $${capital.toLocaleString()} a ${installments} cuotas. Tu cuota mensual es de $${monthlyPayment.toFixed(2)}. El total a pagar es $${totalAmount.toFixed(2)}.`;
-    toggleCalculateButton(); // Actualizar el estado del botón
-}
-
-// Validación automática de ingresos (al perder foco del campo)
-document.getElementById("income").addEventListener("blur", function() {
-    let income = parseFloat(this.value);
-    if (isNaN(income) || income <= 0 || !Number.isInteger(income)) {
-        document.getElementById("incomeError").innerText = "Por favor, ingresa un valor válido para tus ingresos.";
-        this.classList.add("invalid");
-    } else if (income < 1000000) {
-        document.getElementById("incomeError").innerText = "Por favor, ingresa un ingreso de al menos 1,000,000.";
-        this.classList.add("invalid");
-    } else if (income > 30000000) {
-        document.getElementById("incomeError").innerText = "El salario no puede exceder 30,000,000.";
-        this.classList.add("invalid");
+    // Validación para el campo de ingresos
+    if (!income.value || income.value <= 0) {
+        document.getElementById("incomeError").innerText = "Por favor, ingresa un valor válido para los ingresos.";
+        valid = false;
     } else {
         document.getElementById("incomeError").innerText = "";
-        this.classList.remove("invalid");
     }
-    toggleCalculateButton(); // Actualizar el estado del botón
-});
 
-// Validación automática de monto de préstamo (al perder foco del campo)
-document.getElementById("capital").addEventListener("blur", function() {
-    let capital = this.value;
-    if (capital === "other") {
-        let customCapital = document.getElementById("customCapital").value;
-        if (isNaN(customCapital) || customCapital <= 0 || !Number.isInteger(Number(customCapital))) {
-            document.getElementById("capitalError").innerText = "Por favor, ingresa un monto válido para el préstamo.";
-            this.classList.add("invalid");
-        } else {
-            document.getElementById("capitalError").innerText = "";
-            this.classList.remove("invalid");
-        }
+    // Validación para el campo de monto del préstamo
+    if (!capital || capital <= 0) {
+        document.getElementById("capitalError").innerText = "Por favor, selecciona o ingresa un monto válido.";
+        valid = false;
+    } else {
+        document.getElementById("capitalError").innerText = "";
     }
-    toggleCalculateButton(); // Actualizar el estado del botón
-});
 
-// Validación automática de cuotas (al perder foco del campo)
-document.getElementById("installments").addEventListener("blur", function() {
-    let installments = this.value;
-    if (isNaN(installments) || installments <= 0 || !Number.isInteger(Number(installments))) {
+    // Validación para el campo de cuotas
+    if (!installments.value || installments.value <= 0) {
         document.getElementById("installmentsError").innerText = "Por favor, ingresa un número válido de cuotas.";
-        this.classList.add("invalid");
+        valid = false;
     } else {
         document.getElementById("installmentsError").innerText = "";
-        this.classList.remove("invalid");
     }
-    toggleCalculateButton(); // Actualizar el estado del botón
-});
+
+    // Validación para el campo de banco
+    if (!bank) {
+        document.getElementById("bankError").innerText = "Por favor, selecciona un banco.";
+        valid = false;
+    } else {
+        document.getElementById("bankError").innerText = "";
+    }
+
+    // Si todos los campos son válidos, calculamos el préstamo
+    if (valid) {
+        calculateLoan();
+    }
+}
+
+// Función para calcular el préstamo
+function calculateLoan() {
+    const income = parseFloat(document.getElementById("income").value);
+    const capital = parseFloat(document.getElementById("capital").value || document.getElementById("customCapital").value);
+    const installments = parseInt(document.getElementById("installments").value);
+    const bankValue = document.getElementById("bank").value;
+
+    // Buscar el banco seleccionado en el array
+    const selectedBank = banks.find(bank => bank.name === bankValue);
+
+    if (!selectedBank) {
+        alert("Por favor, selecciona un banco.");
+        return;
+    }
+
+    // Obtener la tasa de interés según el banco
+    const interestRate = selectedBank.interestRate;
+
+    // Cálculo de la cuota mensual
+    const monthlyInterest = interestRate / 12;
+    const loanAmount = capital;
+    const months = installments;
+    const numerator = monthlyInterest * Math.pow(1 + monthlyInterest, months);
+    const denominator = Math.pow(1 + monthlyInterest, months) - 1;
+    const monthlyPayment = loanAmount * (numerator / denominator);
+
+    // Mostrar el resultado
+    const result = document.getElementById("result");
+    result.innerHTML = `El monto del préstamo es: $${loanAmount.toLocaleString()} <br>
+                        La cuota mensual es: $${monthlyPayment.toLocaleString()} <br>
+                        Total a pagar: $${(monthlyPayment * months).toLocaleString()}`;
+}
